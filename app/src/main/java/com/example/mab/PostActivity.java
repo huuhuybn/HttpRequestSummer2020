@@ -7,6 +7,11 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+
 public class PostActivity extends AppCompatActivity {
 
 
@@ -31,11 +36,24 @@ public class PostActivity extends AppCompatActivity {
                 String body = edtBody.getText().toString().trim();
                 String title = edtTitle.getText().toString().trim();
 
+                Retrofit retrofit =
+                        RestRetrofit.getInstance("https://jsonplaceholder.typicode.com");
 
-                PostLoader postLoader = new PostLoader(id, body, title);
-                postLoader.setTextView(textView);
-                postLoader.execute(link);
+                RetrofitService retrofitService = retrofit.create(RetrofitService.class);
 
+                retrofitService.getPostData(title, id, body).enqueue(new Callback<PostModel>() {
+                    @Override
+                    public void onResponse(Call<PostModel> call, Response<PostModel> response) {
+                        PostModel postModel = response.body();
+                        textView.setText(postModel.userId + ":" + postModel.title + ":"
+                        + postModel.body);
+                    }
+
+                    @Override
+                    public void onFailure(Call<PostModel> call, Throwable t) {
+
+                    }
+                });
 
 
             }
